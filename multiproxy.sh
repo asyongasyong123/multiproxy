@@ -93,6 +93,38 @@ list_deployed_services() {
 }
 
 # ==============================================
+# DELETE SERVICE
+# ==============================================
+delete_service() {
+  echo -e "\n======================================"
+  echo -e "${CYAN}🗑️ DELETE GCP-XRAY SERVICE${NC}"
+  echo -e "======================================"
+  PROJECT_ID="$(gcloud config get-value project 2>/dev/null)"
+  
+  SERVICES=$(gcloud run services list --format="value(metadata.name, region)" --project="$PROJECT_ID" 2>/dev/null)
+  if [ -z "$SERVICES" ]; then
+    echo -e "${RED}❌ No services found to delete.${NC}"
+    read -p "Press [Enter] to return..."
+    return
+  fi
+
+  echo "Select a service to delete:"
+  select SVC_CHOICE in $(gcloud run services list --format="value(metadata.name)" --project="$PROJECT_ID" 2>/dev/null) "Cancel"; do
+    if [ "$SVC_CHOICE" = "Cancel" ] || [ -z "$SVC_CHOICE" ]; then
+      return
+    break
+    elif [ -n "$SVC_CHOICE" ]; then
+      REGION=$(gcloud run services describe "$SVC_CHOICE" --format="value(metadata.region)" --project="$PROJECT_ID" 2>/dev/null)
+      echo -e "${YELLOW}⚠️ Deleting service '$SVC_CHOICE' in region '$REGION'...${NC}"
+      gcloud run services delete "$SVC_CHOICE" --region="$REGION" --project="$PROJECT_ID" --quiet
+      echo -e "${GREEN}✅ Service deleted successfully!${NC}"
+      break
+    fi
+  done
+  read -p "Press [Enter] to return..."
+}
+
+# ==============================================
 # REGION SELECTOR
 # ==============================================
 select_region() {
@@ -187,7 +219,6 @@ deploy_new_service() {
       read -p "Select Mode [1-2]: " RES_MODE
       case $RES_MODE in
           1)
-              # Auto Presets -> Matic Instance-Based
               BILLING_MODE="instance"
               BILLING_FLAG="--no-cpu-throttling"
 
@@ -230,12 +261,11 @@ deploy_new_service() {
                       CONCURRENCY=130
                       TIMEOUT=3600
                       ;;
-              esac
+              end
               echo -e "${GREEN}✅ Applied Preset: $MEMORY | $CPU vCPU | Min: $MIN_INST | Max: $MAX_INST | Concurrency: $CONCURRENCY${NC}"
               break
               ;;
           2)
-              # Manual Setup -> Prompt for Billing mode first
               echo -e "\n${CYAN}=========================================${NC}"
               echo -e "${GREEN}          BILLING MODE${NC}"
               echo -e "${CYAN}=========================================${NC}"
@@ -281,7 +311,6 @@ deploy_new_service() {
 
               echo -e "${GREEN}✅ Custom Selected: $MEMORY RAM | $CPU vCPU${NC}"
 
-              # Manual scaling configuration prompts
               echo -e "\n${CYAN}=========================================${NC}"
               echo -e "${GREEN}    PERFORMANCE & SCALING CONFIGURATION  ${NC}"
               echo -e "${CYAN}=========================================${NC}"
@@ -403,14 +432,14 @@ http {
     }
     location /trojan-ws {
       proxy_pass http://127.0.0.1:10001; proxy_http_version 1.1;
-      proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "";
+      proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade";
       proxy_set_header Host \$host; proxy_set_header X-Real-IP \$remote_addr;
       proxy_buffering off; proxy_cache_bypass \$http_upgrade;
       proxy_read_timeout 3600s; proxy_send_timeout 3600s;
     }
     location /vless-ws {
       proxy_pass http://127.0.0.1:10002; proxy_http_version 1.1;
-      proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "";
+      proxy_set_header Upgrade \$http_upgrade; proxy_set_header Connection "upgrade";
       proxy_set_header Host \$host; proxy_set_header X-Real-IP \$remote_addr;
       proxy_buffering off; proxy_cache_bypass \$http_upgrade;
       proxy_read_timeout 3600s; proxy_send_timeout 3600s;
@@ -624,14 +653,16 @@ while true; do
   echo "============================================"
   echo "1) Deploy New GCP-XRAY Service"
   echo "2) List All Services & FULL DETAILS"
-  echo "3) Exit Script"
+  echo "3) Delete GCP-XRAY Service"
+  echo "4) Exit Script"
   echo "======================================"
-  read -p "Select Option [1-3]: " MENU_CHOICE
+  read -p "Select Option [1-4]: " MENU_CHOICE
 
   case $MENU_CHOICE in
     1) deploy_new_service ;;
     2) list_deployed_services ;;
-    3) echo -e "\n👋 Goodbye!"; kill -9 $$ ;;
-    *) echo -e "${RED}❌ Enter 1/2/3 only${NC}"; sleep 1 ;;
+    3) delete_service ;;
+    4) echo -e "\n👋 Goodbye!"; exit 0 ;;
+    *) echo -e "${RED}❌ Enter 1/2/3/4 only${NC}"; sleep 1 ;;
   esac
 done
