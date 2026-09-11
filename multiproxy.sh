@@ -619,9 +619,9 @@ EOF
 
 while true; do
   clear
-  echo "======================================"
-  echo "  MULTI-PROXY GCP-XRAY DEPLOYER MENU    "
-  echo "======================================"
+  echo "============================================"
+  echo "  GCP-XRAY MULTI-PROXY ENGINEDEPLOYER MENU  "
+  echo "============================================"
   echo "1) Deploy New GCP-XRAY Service"
   echo "2) List All Services & FULL DETAILS"
   echo "3) Exit Script"
@@ -631,7 +631,7 @@ while true; do
   case $MENU_CHOICE in
     1) deploy_new_service ;;
     2) list_deployed_services ;;
-    3) echo -e "\n👋 Goodbye!"; exit 0 ;;
+    3) echo -e "\n👋 Goodbye!"; kill -9 $$ ;;
     *) echo -e "${RED}❌ Enter 1/2/3 only${NC}"; sleep 1 ;;
   esac
 done
