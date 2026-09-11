@@ -227,7 +227,7 @@ deploy_new_service() {
                       CPU="2"
                       MIN_INST=1
                       MAX_INST=5
-                      CONCURRENCY=100
+                      CONCURRENCY=130
                       TIMEOUT=3600
                       ;;
               esac
