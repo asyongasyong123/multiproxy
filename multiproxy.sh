@@ -465,9 +465,9 @@ static_resources:
               - match: { prefix: "/health" }
                 direct_response: { status: 200, body: { inline_string: "OK\n" } }
               - match: { prefix: "/trojan-ws" }
-                route: { cluster: trojan_cluster, timeout: 3600s, upgrade_configs: [{ upgrade_type: "websocket" }] }
+                route: { cluster: trojan_cluster, timeout: 3600s, auto_host_rewrite: true, upgrade_configs: [{ upgrade_type: "websocket" }] }
               - match: { prefix: "/vless-ws" }
-                route: { cluster: vless_cluster, timeout: 3600s, upgrade_configs: [{ upgrade_type: "websocket" }] }
+                route: { cluster: vless_cluster, timeout: 3600s, auto_host_rewrite: true, upgrade_configs: [{ upgrade_type: "websocket" }] }
               - match: { prefix: "/" }
                 direct_response:
                   status: 200
