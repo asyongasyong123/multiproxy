@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # =========================================
-# 🚀 GCP-XRAY MULTI-ENGINE DEPLOYER — FIXED ✅
-# ✅ ENGINES: OPENRESTY, ENVOY, HAPROXY
-# ✅ WALAY GI-USAB GAWAS SA SYNTAX ERRORS
+# 🚀 GCP-XRAY MULTI-PROXY ENGINE DEPLOYER 🚀
+# ✅ ENGINES: OPENRESTY, ENVOY, HAPROXY ✅
+# 🇵🇭 BY: Con Fig 🇵🇭
 # =========================================
 
 GREEN='\033[1;32m'
@@ -617,7 +617,7 @@ EOF
 while true; do
   clear
   echo "======================================"
-  echo "  MULTI-PROXY-GCP-XRAY DEPLOYER MENU    "
+  echo "  MULTI-PROXY GCP-XRAY DEPLOYER MENU    "
   echo "======================================"
   echo "1) Deploy New GCP-XRAY Service"
   echo "2) List All Services & FULL DETAILS"
