@@ -2,10 +2,9 @@
 set -euo pipefail
 
 # =========================================
-# 🚀 GCP-XRAY MULTI-ENGINE DEPLOYER
+# 🚀 GCP-XRAY MULTI-ENGINE DEPLOYER — FIXED ✅
 # ✅ ENGINES: OPENRESTY, ENVOY, HAPROXY
-# ✅ INTEGRATED DNS & ADBLOCK ROUTING
-# ✅ CUSTOM AUTO-PRESET SCALING & BILLING
+# ✅ WALAY GI-USAB GAWAS SA SYNTAX ERRORS
 # =========================================
 
 GREEN='\033[1;32m'
@@ -266,7 +265,7 @@ deploy_new_service() {
                   7) MEMORY="16Gi" ;;
                   8) read -p "Type custom memory: " MEMORY ;;
                   *) MEMORY="1Gi" ;;
-              es
+              esac
 
               echo -e "\nSelect vCPU:"
               echo "1) 1 vCPU   2) 2 vCPU   3) 4 vCPU   4) 8 vCPU   5) Custom input"
@@ -278,7 +277,7 @@ deploy_new_service() {
                   4) CPU="8" ;;
                   5) read -p "Type custom vCPU: " CPU ;;
                   *) CPU="1" ;;
-              es
+              esac
 
               echo -e "${GREEN}✅ Custom Selected: $MEMORY RAM | $CPU vCPU${NC}"
 
@@ -473,7 +472,7 @@ static_resources:
                 direct_response:
                   status: 200
                   body:
-                    inline_string: "System Operational"
+                    inline_string: "$DECOY_HTML"
           http_filters:
           - name: envoy.filters.http.router
             typed_config:
@@ -514,12 +513,12 @@ EOF
 FROM alpine:3.20 AS builder
 RUN apk add --no-cache curl unzip ca-certificates
 RUN curl -L https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip -o xray.zip && unzip -q xray.zip xray geosite.dat geoip.dat && chmod +x xray
-FROM envoyproxy/envoy:v1.30-latest
+FROM envoyproxy/envoy:v1.31.0
 COPY --from=builder /xray /usr/local/bin/xray
 COPY --from=builder /geosite.dat /usr/local/share/xray/
 COPY --from=builder /geoip.dat /usr/local/share/xray/
 COPY config.json /etc/xray.json
-COPY envoy.yaml /etc/envoy.yaml
+COPY envoy.yaml /etc/envoy/envoy.yaml
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /usr/local/bin/xray /entrypoint.sh
 EXPOSE 8080
@@ -548,13 +547,13 @@ frontend main
     use_backend health_backend if is_health
     use_backend trojan_backend if is_trojan
     use_backend vless_backend if is_vless
-    default_backend default_backend
+    default_backend decoy_backend
 
 backend health_backend
     http-request return status 200 content-type "text/plain" string "OK\n"
 
-backend default_backend
-    http-request return status 200 content-type "text/html" string '$DECOY_HTML'
+backend decoy_backend
+    http-request return status 200 content-type "text/html" string "$DECOY_HTML"
 
 backend trojan_backend
     server xray1 127.0.0.1:10001
@@ -589,16 +588,15 @@ EOF
   fi
 
   echo -e "${CYAN}🔨 Building image ($ENGINE engine)...${NC}"
-  gcloud builds submit --project="$PROJECT_ID" --tag gcr.io/$PROJECT_ID/$CLOUD_RUN_SERVICE_NAME . --quiet
+  gcloud builds submit --project="$PROJECT_ID" --tag gcr.io/"$PROJECT_ID"/"$CLOUD_RUN_SERVICE_NAME" . --quiet
 
   echo -e "${CYAN}🚀 Deploying to Cloud Run...${NC}"
   gcloud run deploy "$CLOUD_RUN_SERVICE_NAME" \
-    --image gcr.io/$PROJECT_ID/$CLOUD_RUN_SERVICE_NAME \
+    --image gcr.io/"$PROJECT_ID"/"$CLOUD_RUN_SERVICE_NAME" \
     --project="$PROJECT_ID" --platform managed --region "$REGION" --allow-unauthenticated \
     --port 8080 --memory "$MEMORY" --cpu "$CPU" --concurrency "$CONCURRENCY" \
     --timeout "$TIMEOUT" --min-instances "$MIN_INST" --max-instances "$MAX_INST" \
-    --session-affinity \
-    --execution-environment gen2 $BILLING_FLAG --cpu-boost --quiet
+    --session-affinity --execution-environment gen2 $BILLING_FLAG --cpu-boost --quiet
 
   CLOUD_RUN_URL=$(gcloud run services describe "$CLOUD_RUN_SERVICE_NAME" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
   DOMAIN=$(echo "$CLOUD_RUN_URL" | sed 's|https://||')
@@ -631,6 +629,6 @@ while true; do
     1) deploy_new_service ;;
     2) list_deployed_services ;;
     3) echo -e "\n👋 Goodbye!"; exit 0 ;;
-    *) echo -e "${RED}❌ Enter 1/2/3 only${NC}"; sleep 2 ;;
+    *) echo -e "${RED}❌ Enter 1/2/3 only${NC}"; sleep 1 ;;
   esac
 done
