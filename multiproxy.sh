@@ -539,6 +539,7 @@ defaults
     timeout connect 10s
     timeout client 3600s
     timeout server 3600s
+    timeout tunnel 3600s
 
 frontend main
     bind *:8080
