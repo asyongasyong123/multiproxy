@@ -199,21 +199,37 @@ deploy_new_service() {
               read -p "Choose preset [1-3]: " AUTO_CHOICE
               case $AUTO_CHOICE in
                   1) 
-                      MEMORY="1Gi"; CPU="1"
-                      MIN_INST=1; MAX_INST=3; CONCURRENCY=80; TIMEOUT=3600
+                      MEMORY="1Gi"
+                      CPU="1"
+                      MIN_INST=1
+                      MAX_INST=3
+                      CONCURRENCY=80
+                      TIMEOUT=3600
                       ;;
                   2) 
-                      MEMORY="2Gi"; CPU="2"
-                      MIN_INST=1; MAX_INST=5; CONCURRENCY=100; TIMEOUT=3600
+                      MEMORY="2Gi"
+                      CPU="2"
+                      MIN_INST=1
+                      MAX_INST=5
+                      CONCURRENCY=100
+                      TIMEOUT=3600
                       ;;
                   3) 
-                      MEMORY="4Gi"; CPU="4"
-                      MIN_INST=1; MAX_INST=5; CONCURRENCY=200; TIMEOUT=3600
+                      MEMORY="4Gi"
+                      CPU="4"
+                      MIN_INST=1
+                      MAX_INST=5
+                      CONCURRENCY=200
+                      TIMEOUT=3600
                       ;;
                   *) 
                       echo -e "${YELLOW}Using Balanced preset default${NC}"
-                      MEMORY="2Gi"; CPU="2"
-                      MIN_INST=1; MAX_INST=5; CONCURRENCY=100; TIMEOUT=3600
+                      MEMORY="2Gi"
+                      CPU="2"
+                      MIN_INST=1
+                      MAX_INST=5
+                      CONCURRENCY=100
+                      TIMEOUT=3600
                       ;;
               esac
               echo -e "${GREEN}✅ Applied Preset: $MEMORY | $CPU vCPU | Min: $MIN_INST | Max: $MAX_INST | Concurrency: $CONCURRENCY${NC}"
@@ -262,7 +278,7 @@ deploy_new_service() {
                   4) CPU="8" ;;
                   5) read -p "Type custom vCPU: " CPU ;;
                   *) CPU="1" ;;
-              esac
+              es
 
               echo -e "${GREEN}✅ Custom Selected: $MEMORY RAM | $CPU vCPU${NC}"
 
